@@ -1,13 +1,53 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, ToastAndroid, View } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Button } from 'react-native-paper';
+import { Button, SnackbarProps } from 'react-native-paper';
 import { MyChart } from '@/components/MyChart';
+import FButton from '@/components/atoms/FButton/FButton';
+import FIconButton from '@/components/atoms/FIconButton/FIconButton';
+import FInput from '@/components/atoms/FInput/FInput';
+import { useState } from 'react';
+import FAlert, {
+  AlertMessageColor,
+  FAlertModel,
+} from '@/components/atoms/FAlert/FAlert';
+import FInputImage from '@/components/atoms/FInputImage/FInputImage';
 
 export default function HomeScreen() {
+  const [image, setImage] = useState<string>('');
+  const [textExample, setTextExample] = useState<string>('');
+  const [alert, setAlert] = useState<FAlertModel>();
+
+  const handleInputChange = (input: string) => {
+    setTextExample(input);
+  };
+
+  const handleShowAlert = () => {
+    const alertPopUp: FAlertModel = {
+      type: AlertMessageColor.Success,
+      textAlert: 'Alerta de teste',
+      options: {
+        visible: true,
+        onDismiss: () => handleHiddenAlert(),
+        action: { label: 'X' },
+        duration: 2000,
+        children: null,
+      },
+    };
+    setAlert(alertPopUp);
+  };
+
+  const handleHiddenAlert = () => {
+    setAlert(undefined);
+  };
+
+  const onGetImage = (img: string) => {
+    setImage(img);
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -60,6 +100,44 @@ export default function HomeScreen() {
       <ThemedView style={styles.stepContainer}>
         <MyChart />
       </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <FButton
+          innerText="Teste"
+          options={{
+            mode: 'contained',
+            children: null,
+            onPress: () => handleShowAlert(),
+          }}
+          textProps={{
+            style: { fontWeight: '600', color: 'white' },
+            children: null,
+          }}
+        />
+        <FIconButton
+          options={{
+            icon: 'camera',
+            mode: 'contained',
+          }}
+        />
+        <FInput
+          options={{
+            value: textExample,
+            onChangeText: (input: string) => handleInputChange(input),
+          }}
+        />
+        <FInputImage onGetImage={onGetImage} />
+        {image && (
+          <View>
+            <Image source={{ uri: image }} style={styles.image} />
+          </View>
+        )}
+      </ThemedView>
+
+      <FAlert
+        textAlert={alert?.textAlert ?? ''}
+        type={alert?.type ?? AlertMessageColor.Info}
+        options={alert?.options}
+      />
     </ParallaxScrollView>
   );
 }
@@ -80,5 +158,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  image: {
+    width: 200,
+    height: 200,
   },
 });
